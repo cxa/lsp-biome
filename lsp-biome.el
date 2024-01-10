@@ -62,7 +62,13 @@
 
 (defun lsp-biome--has-config-file ()
   "Check if there is a biome config file exists."
-  (file-exists-p (f-join (lsp-workspace-root) "biome.json")))
+  (let ((root (lsp-workspace-root)))
+    (or
+     ;; First check if `biome.json' in workspace root
+     (file-exists-p (f-join root "biome.json"))
+     ;; If not check the parent directories because we might be inside
+     ;; a monorepo
+     (locate-dominating-file root "biome.json"))))
 
 (defun lsp-biome--file-can-be-activated (filename)
   (seq-some (lambda (filetype) (string-match filetype filename))
@@ -71,15 +77,16 @@
 (defun lsp-biome--activate-p (filename &optional _)
   "Check if biome language server can/should start. Currently we only
 support projects that installed `biome'."
-  (when-let* ((root (lsp-workspace-root))
+  (when-let* ((wroot (lsp-workspace-root))
+              (broot (locate-dominating-file
+                      wroot
+                      "node_modules/@biomejs/biome/bin/biome"))
               (bin (apply
                     #'f-join
-                    `(,root ,@(split-string
-                               "node_modules/@biomejs/biome/bin/biome" "/"))))
+                    `(,broot ,@(split-string
+                                "node_modules/@biomejs/biome/bin/biome" "/"))))
               ((lsp-biome--has-config-file))
               ((lsp-biome--file-can-be-activated filename)))
-    (unless (file-executable-p bin)
-      (user-error "Biome is not installed on current project: %s" root))
     (setq lsp-biome--bin-path bin)
     t))
 
