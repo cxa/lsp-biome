@@ -88,6 +88,13 @@ support projects that installed `biome'."
               ((lsp-biome--has-config-file))
               ((lsp-biome--file-can-be-activated filename)))
     (setq lsp-biome--bin-path bin)
+    ;; Enploy `apheleia-mode' with a biome formatter if available
+    (when (bound-and-true-p apheleia-mode)
+      (unless (alist-get 'lsp-biome--formatter apheleia-formatters)
+        (push `(lsp-biome--formatter
+                . (,bin "format" "--stdin-file-path" filepath))
+              apheleia-formatters))
+      (setq-local apheleia-formatter '(lsp-biome--formatter)))
     t))
 
 (lsp-make-interactive-code-action biome-organize-imports
@@ -106,14 +113,6 @@ support projects that installed `biome'."
   :add-on? t))
 
 (with-eval-after-load 'lsp-mode
-
-  (defvar lsp-biome--apheleia-mode nil)
-  (defun lsp-biome--format-before-save ()
-    (when (boundp 'apheleia-mode) ;; Avoid conflicting if apheleia enabled
-      (setq-local lsp-biome--apheleia-mode apheleia-mode)
-      (setq-local apheleia-mode nil))
-    (lsp-format-buffer))
-
   (defun lsp-biome--organize-imports-before-save ()
     ;; action may be unavailable, in that case we ignore the noisy error
     (ignore-error lsp-no-code-actions
@@ -135,7 +134,15 @@ support projects that installed `biome'."
     (when lsp-biome-autofix-on-save
       (lsp-biome--autofix-before-save))
     (when lsp-biome-format-on-save
-      (lsp-biome--format-before-save)))
+      ;; Use `lsp-format-buffer' only if `apheleia-mode' is
+      ;; unavailable. Note that this may cause slow unexpected
+      ;; multiple edits applying (ref:
+      ;; https://github.com/emacs-lsp/lsp-mode/issues/2446)
+      ;; You also need to set below to avoid above behavior
+      ;; (setq lsp-enable-on-type-formatting nil)
+      ;; (setq lsp-enable-indentation nil)
+      (unless (bound-and-true-p apheleia-mode)
+        (lsp-format-buffer))))
 
   (defun lsp-biome--workspace-p (workspace)
     (eq (lsp--client-server-id (lsp--workspace-client workspace))
@@ -156,8 +163,6 @@ support projects that installed `biome'."
                          lsp-biome--activated-p)
                 (defalias 'lsp-organize-imports lsp-biome--orig-org-imports)
                 (remove-hook 'before-save-hook #'lsp-biome--before-save-hook t))
-              (when (boundp 'apheleia-mode)
-                (setq-local apheleia-mode lsp-biome--apheleia-mode))
               (setq lsp-biome--activated-p nil))))
 
 (provide 'lsp-biome)
