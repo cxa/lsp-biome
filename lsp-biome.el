@@ -91,8 +91,8 @@ support projects that installed `biome'."
     ;; Enploy `apheleia-mode' with a biome formatter if available
     (when (bound-and-true-p apheleia-mode)
       (unless (alist-get 'lsp-biome--formatter apheleia-formatters)
-        (push `(lsp-biome--formatter
-                . (,bin "format" "--stdin-file-path" filepath))
+        (push '(lsp-biome--formatter
+                . ("apheleia-npx" "biome" "format" "--stdin-file-path" filepath))
               apheleia-formatters))
       (setq-local apheleia-formatter '(lsp-biome--formatter)))
     t))
