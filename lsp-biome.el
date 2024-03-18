@@ -64,11 +64,12 @@
   "Check if there is a biome config file exists."
   (let ((root (lsp-workspace-root)))
     (or
-     ;; First check if `biome.json' in workspace root
-     (file-exists-p (f-join root "biome.json"))
-     ;; If not check the parent directories because we might be inside
-     ;; a monorepo
-     (locate-dominating-file root "biome.json"))))
+     ;; First check if `biome.json'/`biome.jsonc' in workspace root
+     (directory-files root t "biome.jsonc?")
+     ;; If not found, check the parent directories because we might be
+     ;; inside a monorepo
+     (locate-dominating-file root "biome.json")
+     (locate-dominating-file root "biome.jsonc"))))
 
 (defun lsp-biome--file-can-be-activated (filename)
   (seq-some (lambda (filetype) (string-match filetype filename))
