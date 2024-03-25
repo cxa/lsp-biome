@@ -36,7 +36,7 @@
   :group 'lsp-mode
   :link '(url-link "https://github.com/cxa/lsp-biome"))
 
-(defcustom lsp-biome-active-file-types '("\\.[tj]s[x]?\\'" "\\.json\\'")
+(defcustom lsp-biome-active-file-types '("\\.[tj]s[x]?\\'" "\\.json[c]?\\'")
   "File types that lsp-biome should activate."
   :type '(repeat regexp)
   :group 'lsp-biome)
