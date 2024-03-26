@@ -148,22 +148,24 @@ support projects that installed `biome'."
   (eq (lsp--client-server-id (lsp--workspace-client workspace))
       'biome))
 
-(add-hook 'lsp-after-initialize-hook
-          (defun lsp-biome--after-init ()
-            (when (and (lsp-biome--workspace-p lsp--cur-workspace)
-                       lsp-biome--activated-p)
-              (defalias 'lsp-organize-imports #'lsp-biome-organize-imports)
-              (when (lsp-biome--should-add-save-hook-p)
-                (add-hook 'before-save-hook
-                          #'lsp-biome--before-save-hook nil t)))))
+(with-eval-after-load 'lsp-mode
+  (add-hook 'lsp-after-open-hook
+            (defun lsp-biome--after-open ()
+              (when (and (lsp-biome--workspace-p lsp--cur-workspace)
+                         lsp-biome--activated-p)
+                (defalias 'lsp-organize-imports #'lsp-biome-organize-imports)
+                (when (lsp-biome--should-add-save-hook-p)
+                  (add-hook 'before-save-hook
+                            #'lsp-biome--before-save-hook nil t)))))
 
-(add-hook 'lsp-after-uninitialized-functions
-          (defun lsp-biome--after-uninit (workspace)
-            (when (and (lsp-biome--workspace-p workspace)
-                       lsp-biome--activated-p)
-              (defalias 'lsp-organize-imports lsp-biome--orig-org-imports)
-              (remove-hook 'before-save-hook #'lsp-biome--before-save-hook t))
-            (setq lsp-biome--activated-p nil)))
+  (add-hook 'lsp-after-uninitialized-functions
+            (defun lsp-biome--after-uninit (workspace)
+              (when (and (lsp-biome--workspace-p workspace)
+                         lsp-biome--activated-p)
+                (defalias 'lsp-organize-imports lsp-biome--orig-org-imports)
+                (remove-hook 'before-save-hook #'lsp-biome--before-save-hook t))
+              (setq lsp-biome--activated-p nil))))
 
 (provide 'lsp-biome)
 ;;; lsp-biome.el ends here
+
