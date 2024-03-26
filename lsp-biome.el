@@ -113,58 +113,57 @@ support projects that installed `biome'."
   :priority -1
   :add-on? t))
 
-(with-eval-after-load 'lsp-mode
-  (defun lsp-biome--organize-imports-before-save ()
-    ;; action may be unavailable, in that case we ignore the noisy error
-    (ignore-error lsp-no-code-actions
-      (lsp-biome-organize-imports)))
+(defun lsp-biome--organize-imports-before-save ()
+  ;; action may be unavailable, in that case we ignore the noisy error
+  (ignore-error lsp-no-code-actions
+    (lsp-biome-organize-imports)))
 
-  (defun lsp-biome--autofix-before-save ()
-    ;; action may be unavailable, in that case we ignore the noisy error
-    (ignore-error lsp-no-code-actions
-      (lsp-biome-fix-all)))
+(defun lsp-biome--autofix-before-save ()
+  ;; action may be unavailable, in that case we ignore the noisy error
+  (ignore-error lsp-no-code-actions
+    (lsp-biome-fix-all)))
 
-  (defun lsp-biome--should-add-save-hook-p ()
-    (or lsp-biome-format-on-save
-        lsp-biome-organize-imports-on-save
-        lsp-biome-autofix-on-save))
+(defun lsp-biome--should-add-save-hook-p ()
+  (or lsp-biome-format-on-save
+      lsp-biome-organize-imports-on-save
+      lsp-biome-autofix-on-save))
 
-  (defun lsp-biome--before-save-hook ()
-    (when lsp-biome-organize-imports-on-save
-      (lsp-biome--organize-imports-before-save))
-    (when lsp-biome-autofix-on-save
-      (lsp-biome--autofix-before-save))
-    (when lsp-biome-format-on-save
-      ;; Use `lsp-format-buffer' only if `apheleia-mode' is
-      ;; unavailable. Note that this may cause slow unexpected
-      ;; multiple edits applying (ref:
-      ;; https://github.com/emacs-lsp/lsp-mode/issues/2446)
-      ;; You also need to set below to avoid above behavior
-      ;; (setq lsp-enable-on-type-formatting nil)
-      ;; (setq lsp-enable-indentation nil)
-      (unless (bound-and-true-p apheleia-mode)
-        (lsp-format-buffer))))
+(defun lsp-biome--before-save-hook ()
+  (when lsp-biome-organize-imports-on-save
+    (lsp-biome--organize-imports-before-save))
+  (when lsp-biome-autofix-on-save
+    (lsp-biome--autofix-before-save))
+  (when lsp-biome-format-on-save
+    ;; Use `lsp-format-buffer' only if `apheleia-mode' is
+    ;; unavailable. Note that this may cause slow unexpected
+    ;; multiple edits applying (ref:
+    ;; https://github.com/emacs-lsp/lsp-mode/issues/2446)
+    ;; You also need to set below to avoid above behavior
+    ;; (setq lsp-enable-on-type-formatting nil)
+    ;; (setq lsp-enable-indentation nil)
+    (unless (bound-and-true-p apheleia-mode)
+      (lsp-format-buffer))))
 
-  (defun lsp-biome--workspace-p (workspace)
-    (eq (lsp--client-server-id (lsp--workspace-client workspace))
-        'biome))
+(defun lsp-biome--workspace-p (workspace)
+  (eq (lsp--client-server-id (lsp--workspace-client workspace))
+      'biome))
 
-  (add-hook 'lsp-after-initialize-hook
-            (defun lsp-biome--after-init ()
-              (when (and (lsp-biome--workspace-p lsp--cur-workspace)
-                         lsp-biome--activated-p)
-                (defalias 'lsp-organize-imports #'lsp-biome-organize-imports)
-                (when (lsp-biome--should-add-save-hook-p)
-                  (add-hook 'before-save-hook
-                            #'lsp-biome--before-save-hook nil t)))))
-  
-  (add-hook 'lsp-after-uninitialized-functions
-            (defun lsp-biome--after-uninit (workspace)
-              (when (and (lsp-biome--workspace-p workspace)
-                         lsp-biome--activated-p)
-                (defalias 'lsp-organize-imports lsp-biome--orig-org-imports)
-                (remove-hook 'before-save-hook #'lsp-biome--before-save-hook t))
-              (setq lsp-biome--activated-p nil))))
+(add-hook 'lsp-after-initialize-hook
+          (defun lsp-biome--after-init ()
+            (when (and (lsp-biome--workspace-p lsp--cur-workspace)
+                       lsp-biome--activated-p)
+              (defalias 'lsp-organize-imports #'lsp-biome-organize-imports)
+              (when (lsp-biome--should-add-save-hook-p)
+                (add-hook 'before-save-hook
+                          #'lsp-biome--before-save-hook nil t)))))
+
+(add-hook 'lsp-after-uninitialized-functions
+          (defun lsp-biome--after-uninit (workspace)
+            (when (and (lsp-biome--workspace-p workspace)
+                       lsp-biome--activated-p)
+              (defalias 'lsp-organize-imports lsp-biome--orig-org-imports)
+              (remove-hook 'before-save-hook #'lsp-biome--before-save-hook t))
+            (setq lsp-biome--activated-p nil)))
 
 (provide 'lsp-biome)
 ;;; lsp-biome.el ends here
