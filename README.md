@@ -25,7 +25,15 @@ To integrate `lsp-biome` into your Emacs setup, you can take either:
 
 Customize the behavior of `lsp-biome` using the following configuration options:
 
-- **lsp-biome-active-file-types**: File types that `lsp-biome` should activate. The default is `("\\.[tj]s[x]?\\'" "\\.json\\'")`.
+- **lsp-biome-active-file-types**: File types that `lsp-biome` should activate. The default is:
+  ```elsip
+  (list (rx "." (or "tsx" "jsx"
+                    "ts" "js"
+                    "mts" "mjs"
+                    "cts" "cjs"
+                    "json" "jsonc")
+            eos)
+  ```
 - **lsp-biome-organize-imports-on-save**: Enable/disable automatic organization of imports on save. The default is `nil`.
 - **lsp-biome-autofix-on-save**: Enable/disable automatic fixes on save. The default is `nil`.
 - **lsp-biome-format-on-save**: Enable/disable automatic formatting on save. The default is `nil`.
