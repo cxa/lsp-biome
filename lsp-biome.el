@@ -40,7 +40,8 @@
                                                          "ts" "js"
                                                          "mts" "mjs"
                                                          "cts" "cjs"
-                                                         "json" "jsonc")
+                                                         "json" "jsonc"
+                                                         "css")
                                                  eos))
   "File types that lsp-biome should activate."
   :type '(repeat regexp)
