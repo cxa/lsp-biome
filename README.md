@@ -19,6 +19,7 @@ To integrate `lsp-biome` into your Emacs setup, you can take either:
    ```elisp
    (use-package lsp-biome
        :quelpa (lsp-biome :fetcher github :repo "cxa/lsp-biome"))
+       ;; or :vc (:url "https://github.com/cxa/lsp-biome") if are using Emacs 30+
    ```
 
 ## Configuration
@@ -31,7 +32,8 @@ Customize the behavior of `lsp-biome` using the following configuration options:
                     "ts" "js"
                     "mts" "mjs"
                     "cts" "cjs"
-                    "json" "jsonc")
+                    "json" "jsonc"
+                    "css")
             eos)
   ```
 - **lsp-biome-organize-imports-on-save**: Enable/disable automatic organization of imports on save. The default is `nil`.
