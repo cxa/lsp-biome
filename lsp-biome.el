@@ -104,9 +104,23 @@ support projects that installed `biome'."
       (setq-local apheleia-formatter '(lsp-biome--formatter)))
     t))
 
-(lsp-make-interactive-code-action biome-organize-imports
-                                  "source.organizeImports.biome")
-(lsp-make-interactive-code-action biome-fix-all "source.fixAll.biome")
+(defun lsp-biome-organize-imports ()
+  "Perform the `source.organizeImports.biome' code action, if available."
+  (interactive)
+  (condition-case nil
+      (lsp-execute-code-action-by-kind "source.organizeImports.biome")
+    (lsp-no-code-actions
+     (when (called-interactively-p 'any)
+       (lsp--info "All imports are already organized!")))))
+
+(defun lsp-biome-fix-all ()
+  "Perform the `source.fixAll.biome' code action, if available."
+  (interactive)
+  (condition-case nil
+      (lsp-execute-code-action-by-kind "source.fixAll.biome")
+    (lsp-no-code-actions
+     (when (called-interactively-p 'any)
+       (lsp--info "Biome has fixed everything it could!")))))
 
 (lsp-register-client
  (make-lsp-client
