@@ -66,7 +66,7 @@
 (defvar lsp-biome--activated-p nil)
 (defvar lsp-biome--orig-org-imports (symbol-function 'lsp-organize-imports))
 
-(defun lsp-biome--has-config-file ()
+(defun lsp-biome--has-config-p ()
   "Check if there is a biome config file exists."
   (let ((root (lsp-workspace-root)))
     (or
@@ -92,9 +92,9 @@ support projects that installed `biome'."
                     #'f-join
                     `(,broot ,@(split-string
                                 "node_modules/@biomejs/biome/bin/biome" "/"))))
-              ((lsp-biome--has-config-file))
+              ((lsp-biome--has-config-p))
               ((lsp-biome--file-can-be-activated filename)))
-    (setq lsp-biome--bin-path bin)
+    (setq-local lsp-biome--bin-path bin)
     ;; Enploy `apheleia-mode' with a biome formatter if available
     (when (bound-and-true-p apheleia-mode)
       (unless (alist-get 'lsp-biome--formatter apheleia-formatters)
@@ -126,7 +126,7 @@ support projects that installed `biome'."
  (make-lsp-client
   :new-connection (lsp-stdio-connection
                    (lambda ()
-                     (setq lsp-biome--activated-p t)
+                     (setq-local lsp-biome--activated-p t)
                      `(,lsp-biome--bin-path "lsp-proxy")))
   :activation-fn #'lsp-biome--activate-p
   :server-id 'biome
@@ -184,8 +184,7 @@ support projects that installed `biome'."
                          lsp-biome--activated-p)
                 (defalias 'lsp-organize-imports lsp-biome--orig-org-imports)
                 (remove-hook 'before-save-hook #'lsp-biome--before-save-hook t))
-              (setq lsp-biome--activated-p nil))))
+              (setq-local lsp-biome--activated-p nil))))
 
 (provide 'lsp-biome)
 ;;; lsp-biome.el ends here
-
