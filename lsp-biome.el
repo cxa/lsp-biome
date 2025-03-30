@@ -4,7 +4,7 @@
 
 ;; Author: realazy <xianan.chen@gmail.com>
 ;; Keywords: biome
-;; Version: 0.1
+;; Version: 0.1.1
 ;; Package-Requires: ((lsp-mode "8.0.0"))
 ;; URL: https://github.com/cxa/lsp-biome
 
@@ -25,7 +25,7 @@
 
 ;;; Commentary:
 
-;; 
+;;
 
 ;;; Code:
 
@@ -81,17 +81,25 @@
   (seq-some (lambda (filetype) (string-match filetype filename))
             lsp-biome-active-file-types))
 
+(defun lsp-biome--find-exe (pathlist &optional exe-name)
+  "Locate the first executable (by defult `biome') within pathlist."
+  (let ((exe-paths
+         (mapcar (lambda (dir) (concat (file-name-as-directory dir) (or exe-name "biome")))
+                 pathlist)
+         ))
+    (cl-find-if #'file-executable-p exe-paths)
+    )
+  )
+
 (defun lsp-biome--activate-p (filename &optional _)
-  "Check if biome language server can/should start. Currently we only
-support projects that installed `biome'."
+  "Check if biome language server can/should start.
+We look for the executable first the npm installation of `biome', then the OS PATH."
   (when-let* ((wroot (lsp-workspace-root))
-              (broot (locate-dominating-file
-                      wroot
-                      "node_modules/@biomejs/biome/bin/biome"))
-              (bin (apply
-                    #'f-join
-                    `(,broot ,@(split-string
-                                "node_modules/@biomejs/biome/bin/biome" "/"))))
+              (node-biome-bin "node_modules/@biomejs/biome/bin")
+              (bin (lsp-biome--find-exe
+                    (let
+                        ((broot (locate-dominating-file wroot node-biome-bin)))
+                      (if broot (cons node-biome-bin exec-path) exec-path))))
               ((lsp-biome--has-config-p))
               ((lsp-biome--file-can-be-activated filename)))
     (setq-local lsp-biome--bin-path bin)
