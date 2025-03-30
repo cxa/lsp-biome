@@ -29,6 +29,7 @@
 
 ;;; Code:
 
+(require 'cl-seq)
 (require 'lsp-mode)
 
 (defgroup lsp-biome nil
@@ -99,7 +100,7 @@ We look for the executable first the npm installation of `biome', then the OS PA
               (bin (lsp-biome--find-exe
                     (let
                         ((broot (locate-dominating-file wroot node-biome-bin)))
-                      (if broot (cons node-biome-bin exec-path) exec-path))))
+                      (if broot (cons broot exec-path) exec-path))))
               ((lsp-biome--has-config-p))
               ((lsp-biome--file-can-be-activated filename)))
     (setq-local lsp-biome--bin-path bin)
