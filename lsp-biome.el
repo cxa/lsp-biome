@@ -67,34 +67,49 @@
 (defvar lsp-biome--activated-p nil)
 (defvar lsp-biome--orig-org-imports (symbol-function 'lsp-organize-imports))
 
+(defun lsp-biome--workspace-roots (&optional path)
+  "Find the workspace roots for the current file or PATH."
+  (-when-let* ((file-name (or path (buffer-file-name)))
+               (file-name (lsp-f-canonical file-name)))
+    (->> (lsp-session)
+         (lsp-session-folders)
+         (--filter (and (lsp--files-same-host it file-name)
+                        (or (lsp-f-ancestor-of? it file-name)
+                            (equal it file-name)))))))
+
+(defun lsp-biome--has-config-in-path (path)
+  "Check biome config file biome.json[c] exist or not in PATH."
+  (directory-files path t "biome.jsonc?"))
+
 (defun lsp-biome--has-config-p ()
   "Check if there is a biome config file exists."
-  (let ((root (lsp-workspace-root)))
-    (or
-     ;; First check if `biome.json'/`biome.jsonc' in workspace root
-     (directory-files root t "biome.jsonc?")
-     ;; If not found, check the parent directories because we might be
-     ;; inside a monorepo
-     (locate-dominating-file root "biome.json")
-     (locate-dominating-file root "biome.jsonc"))))
+  (seq-some #'lsp-biome--has-config-in-path (lsp-biome--workspace-roots)))
 
 (defun lsp-biome--file-can-be-activated (filename)
   (seq-some (lambda (filetype) (string-match filetype filename))
             lsp-biome-active-file-types))
 
+(defun lsp-biome--find-biome-in-path (path)
+  "Find `biome' in PATH."
+  (when-let* ((bin-dir (locate-dominating-file
+                        path
+                        "node_modules/@biomejs/biome/bin/biome"))
+              (bin (apply #'f-join
+                          `(,bin-dir
+                            ,@(split-string
+                               "node_modules/@biomejs/biome/bin/biome" "/")))))
+    (and (file-executable-p bin) bin)))
+
+(defun lsp-biome--find-biome-bin ()
+  (or (seq-some #'lsp-biome--find-biome-in-path (lsp-biome--workspace-roots))
+      (executable-find "biome")))
+
 (defun lsp-biome--activate-p (filename &optional _)
   "Check if biome language server can/should start. Currently we only
 support projects that installed `biome'."
-  (when-let* ((wroot (lsp-workspace-root))
-              (broot (locate-dominating-file
-                      wroot
-                      "node_modules/@biomejs/biome/bin/biome"))
-              (bin (apply
-                    #'f-join
-                    `(,broot ,@(split-string
-                                "node_modules/@biomejs/biome/bin/biome" "/"))))
-              ((lsp-biome--has-config-p))
-              ((lsp-biome--file-can-be-activated filename)))
+  (when-let* ((bin (lsp-biome--find-biome-bin))
+              ( (lsp-biome--has-config-p))
+              ( (lsp-biome--file-can-be-activated filename)))
     (setq-local lsp-biome--bin-path bin)
     ;; Enploy `apheleia-mode' with a biome formatter if available
     (when (bound-and-true-p apheleia-mode)
