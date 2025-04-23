@@ -49,5 +49,5 @@ Explore the following commands provided by `lsp-biome`:
 
 ## Notice
 
-Please note that `lsp-biome` only works with projects that have `biome` installed locally (a.k.a `node_modules` inside project).
+To use `lsp-biome`, you must install `biome` either within your project or globally (ensure that Emacs can locate your `biome` in the `$PATH`).
 
