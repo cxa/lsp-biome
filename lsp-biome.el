@@ -77,12 +77,12 @@
                       (lsp-workspace-root file-name)
                       ;; 2. root by `project.el`
                       ;; 2.1 find root in normal way
-                      (when-let* ((proj (project-try-vc--search dir)))
+                      (when-let ((proj (project-try-vc--search dir)))
                         (project-root proj))
                       ;; 2.2  `project-vc-extra-root-markers' is nil,
                       ;;      ensures that we can retrieve the topmost root
                       (let ((project-vc-extra-root-markers nil))
-                        (when-let* ((proj (project-try-vc--search dir)))
+                        (when-let ((proj (project-try-vc--search dir)))
                           (project-root proj)))
                       ;; 3. root by locating `biome.jsonc?`
                       (or (locate-dominating-file dir "biome.json")
