@@ -71,11 +71,11 @@
   "Find the workspace roots for the current file or PATH."
   (-when-let* ((file-name (or path (buffer-file-name)))
                (file-name (lsp-f-canonical file-name)))
-    (->> (lsp-session)
-         (lsp-session-folders)
-         (--filter (and (lsp--files-same-host it file-name)
-                        (or (lsp-f-ancestor-of? it file-name)
-                            (equal it file-name)))))))
+    (seq-uniq
+     (seq-remove #'null
+                 (list (lsp-workspace-root file-name)
+                       (or (locate-dominating-file file-name "biome.json")
+                           (locate-dominating-file file-name "biome.jsonc")))))))
 
 (defun lsp-biome--has-config-in-path (path)
   "Check biome config file biome.json[c] exist or not in PATH."
