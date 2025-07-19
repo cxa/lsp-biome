@@ -63,6 +63,11 @@
   :type 'boolean
   :group 'lsp-biome)
 
+(defcustom lsp-biome-add-on-mode t
+  "Run lsp-biome with add-on mode (allowing multiple LSP servers) or not."
+  :type 'boolean
+  :group 'lsp-biome)
+
 (defvar lsp-biome--bin-path nil)
 (defvar lsp-biome--activated-p nil)
 (defvar lsp-biome--orig-org-imports (symbol-function 'lsp-organize-imports))
@@ -162,7 +167,7 @@ if it is not found, default to the system-installed version."
   :activation-fn #'lsp-biome--activate-p
   :server-id 'biome
   :priority -1
-  :add-on? t))
+  :add-on? lsp-biome-add-on-mode))
 
 (defun lsp-biome--organize-imports-before-save ()
   ;; action may be unavailable, in that case we ignore the noisy error
