@@ -18,15 +18,15 @@ To integrate `lsp-biome` into your Emacs setup, you can take either:
 
    ```elisp
    (use-package lsp-biome
-       :quelpa (lsp-biome :fetcher github :repo "cxa/lsp-biome"))
-       ;; or :vc (:url "https://github.com/cxa/lsp-biome") if are using Emacs 30+
+       :vc (:url "https://github.com/cxa/lsp-biome"))
+       ;; or :quelpa (lsp-biome :fetcher github :repo "cxa/lsp-biome")) if are using Emacs below 30
    ```
 
 ## Configuration
 
 Customize the behavior of `lsp-biome` using the following configuration options:
 
-- **lsp-biome-active-file-types**: File types that `lsp-biome` should activate. The default is:
+- `lsp-biome-active-file-types`: file types that `lsp-biome` should activate, default is:
   ```elsip
   (list (rx "." (or "tsx" "jsx"
                     "ts" "js"
@@ -36,16 +36,30 @@ Customize the behavior of `lsp-biome` using the following configuration options:
                     "css")
             eos)
   ```
-- **lsp-biome-organize-imports-on-save**: Enable/disable automatic organization of imports on save. The default is `nil`.
-- **lsp-biome-autofix-on-save**: Enable/disable automatic fixes on save. The default is `nil`.
-- **lsp-biome-format-on-save**: Enable/disable automatic formatting on save. The default is `nil`.
+  
+- `lsp-biome-active-hook`: Hooks to run after activation, default is `nil`. See below for a usage example.
 
 ## Commands
 
 Explore the following commands provided by `lsp-biome`:
 
-- **`lsp-biome-organize-imports`**: Organize imports in the current buffer. Note: This overrides `lsp-organize-imports` under `lsp-biome`, and they are equivalent.
+- **`lsp-biome-organize-imports`**: Organize imports in the current buffer.
 - **`lsp-biome-fix-all`**: Apply automatic code fixes in current buffer.
+
+## Tips
+
+Use with `apheleia`:
+
+``` elsip
+(use-package lsp-biome
+  :vc (:url "https://github.com/cxa/lsp-biome")
+  :preface
+  (defun my/lsp-biome-active-hook ()
+    (setq-local apheleia-formatter '(biome)))
+  
+  :config
+  (add-hook 'lsp-biome-active-hook #'my/lsp-biome-active-hook))
+```
 
 ## Notice
 
