@@ -1,6 +1,9 @@
+> [!NOTE]
+> If you like to run `biome` with Eglot, check out <https://github.com/cxa/eglot-lspx>.
+
 # lsp-biome
 
-**lsp-mode Client for [Biome](https://biomejs.dev/)**
+**lsp-mode client for [Biome](https://biomejs.dev/)**. 
 
 ## Installation
 
