@@ -21,7 +21,7 @@ To integrate `lsp-biome` into your Emacs setup, you can take either:
 
    ```elisp
    (use-package lsp-biome
-       :vc (:url "https://github.com/cxa/lsp-biome"))
+       :vc (:url "https://github.com/cxa/lsp-biome" :rev :newest))
        ;; or :quelpa (lsp-biome :fetcher github :repo "cxa/lsp-biome")) if are using Emacs below 30
    ```
 
@@ -55,7 +55,7 @@ Use with `apheleia`:
 
 ``` elsip
 (use-package lsp-biome
-  :vc (:url "https://github.com/cxa/lsp-biome")
+  :vc (:url "https://github.com/cxa/lsp-biome" :rev :newest)
   :preface
   (defun my/lsp-biome-active-hook ()
     (setq-local apheleia-formatter '(biome)))
