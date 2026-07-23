@@ -1,5 +1,5 @@
 > [!NOTE]
-> If you like to run `biome` with Eglot, check out <https://github.com/cxa/eglot-lspx>.
+> If you like to run `biome` with Eglot, check out <https://github.com/cxa/eglotx>.
 
 # lsp-biome
 
